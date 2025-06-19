@@ -51,7 +51,7 @@ const RoleSelection = ({ onRoleSelect, onBack }: RoleSelectionProps) => {
               <ul className="space-y-3 text-gray-600">
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3" />
-                  Complete credential verification
+                  Complete credential verification (CBT/NLP)
                 </li>
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3" />
@@ -60,6 +60,10 @@ const RoleSelection = ({ onRoleSelect, onBack }: RoleSelectionProps) => {
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3" />
                   Manage your availability & bookings
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3" />
+                  Indicate insurance acceptance
                 </li>
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3" />
@@ -86,11 +90,15 @@ const RoleSelection = ({ onRoleSelect, onBack }: RoleSelectionProps) => {
               <ul className="space-y-3 text-gray-600">
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
-                  Browse verified therapist profiles
+                  Browse verified CBT & NLP therapist profiles
                 </li>
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
-                  Book sessions instantly
+                  Filter by insurance acceptance
+                </li>
+                <li className="flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
+                  Book sessions instantly with Calendly
                 </li>
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
@@ -98,7 +106,7 @@ const RoleSelection = ({ onRoleSelect, onBack }: RoleSelectionProps) => {
                 </li>
                 <li className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3" />
-                  Track your progress
+                  Track your progress with feedback surveys
                 </li>
               </ul>
             </CardContent>

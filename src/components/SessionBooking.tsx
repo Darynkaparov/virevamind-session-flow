@@ -57,7 +57,7 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
     setIsBooked(true);
     toast({
       title: "Session Booked Successfully!",
-      description: "You'll receive a confirmation email with Zoom link shortly.",
+      description: "You'll receive a confirmation email with Calendly Zoom link and calendar invite shortly.",
     });
   };
 
@@ -67,7 +67,7 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
         <div className="text-center">
           <CheckCircle className="h-24 w-24 text-green-600 mx-auto mb-6" />
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Session Confirmed!</h1>
-          <p className="text-xl text-gray-600 mb-8">Your session with {therapist.name} has been booked</p>
+          <p className="text-xl text-gray-600 mb-8">Your session with {therapist.name} has been booked via Calendly</p>
 
           <Card className="max-w-2xl mx-auto mb-8">
             <CardHeader>
@@ -80,6 +80,10 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
               <div className="flex justify-between">
                 <span className="font-medium">Therapist:</span>
                 <span>{therapist.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium">Certification:</span>
+                <span>{therapist.certificationType}</span>
               </div>
               <div className="flex justify-between">
                 <span className="font-medium">Date:</span>
@@ -97,6 +101,12 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
                 <span className="font-medium">Price:</span>
                 <span>{durations.find(d => d.value === selectedDuration)?.price}</span>
               </div>
+              {therapist.isInsured && (
+                <div className="flex justify-between">
+                  <span className="font-medium">Insurance:</span>
+                  <Badge variant="default" className="bg-green-600">Covered</Badge>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -113,10 +123,11 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
           <div className="mt-8 p-4 bg-blue-50 rounded-lg">
             <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
             <ul className="text-blue-800 text-sm space-y-1">
-              <li>• You'll receive a confirmation email with Zoom link</li>
-              <li>• Calendar invite will be sent to your email</li>
+              <li>• Confirmation email sent with Calendly-generated Zoom link</li>
+              <li>• Google/iCal calendar invite automatically sent</li>
               <li>• Join 5 minutes before your session time</li>
-              <li>• Post-session feedback survey will be sent after</li>
+              <li>• Post-session NPS + custom feedback survey will be sent</li>
+              <li>• Session logged for continuous compliance monitoring</li>
             </ul>
           </div>
         </div>
@@ -172,8 +183,11 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
               </div>
 
               <div>
-                <span className="text-sm font-medium text-gray-700">License: </span>
-                <Badge variant="secondary">{therapist.licenseType}</Badge>
+                <span className="text-sm font-medium text-gray-700">Certification: </span>
+                <Badge variant="secondary">{therapist.certificationType}</Badge>
+                {therapist.licenseNumber && (
+                  <span className="text-xs text-gray-500 block mt-1">License: #{therapist.licenseNumber}</span>
+                )}
               </div>
 
               <div>
@@ -197,6 +211,16 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
                   ))}
                 </div>
               </div>
+
+              {therapist.isInsured && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 text-green-600 mr-2" />
+                    <span className="text-sm font-medium text-green-900">Professional Liability Insurance</span>
+                  </div>
+                  <p className="text-green-700 text-xs mt-1">This therapist carries professional insurance coverage</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -210,7 +234,7 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
                 Book Your Session
               </CardTitle>
               <CardDescription>
-                Select your preferred date, time, and session duration
+                Select your preferred date, time, and session duration. Booking powered by Calendly API integration.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -257,7 +281,7 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
               {/* Time Selection */}
               {selectedDate && (
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Available Times</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">Available Times (Calendly Integration)</h3>
                   <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                     {availableSlots.map((time) => (
                       <Button
@@ -280,8 +304,11 @@ const SessionBooking = ({ therapist, onBack }: SessionBookingProps) => {
                   className="w-full h-12 text-lg bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
                   disabled={!selectedDate || !selectedTime || !selectedDuration}
                 >
-                  Book Session {selectedDuration && `- ${durations.find(d => d.value === selectedDuration)?.price}`}
+                  Book Session via Calendly {selectedDuration && `- ${durations.find(d => d.value === selectedDuration)?.price}`}
                 </Button>
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  Auto-generated Zoom/Google Meet link • Calendar invites • Post-session NPS survey
+                </p>
               </div>
             </CardContent>
           </Card>

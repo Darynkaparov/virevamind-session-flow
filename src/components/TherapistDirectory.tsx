@@ -8,62 +8,70 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Filter, MapPin, Star, Shield, Calendar } from "lucide-react";
 
-// Mock therapist data
+// Mock therapist data with enhanced certification and insurance details
 const mockTherapists = [
   {
     id: 1,
     name: "Dr. Sarah Johnson",
     photo: "/placeholder.svg",
     bio: "Specialized in CBT with 10+ years experience helping clients overcome anxiety and limiting beliefs.",
-    licenseType: "CBT",
+    certificationType: "Cognitive Behavioral Therapist",
+    licenseNumber: "CBT-12345",
     focusAreas: ["Anxiety", "Limiting Beliefs", "Self-Esteem"],
     languages: ["English", "Spanish"],
     location: "New York, NY",
     rating: 4.9,
     sessions: 250,
     verified: true,
+    isInsured: true,
     availability: "Available today"
   },
   {
     id: 2,
     name: "Dr. Michael Chen",
     photo: "/placeholder.svg",
-    bio: "NLP practitioner focused on emotional regulation and relationship dynamics with a holistic approach.",
-    licenseType: "NLP",
+    bio: "NLP Master Practitioner focused on emotional regulation and relationship dynamics with a holistic approach.",
+    certificationType: "NLP Master Practitioner",
+    licenseNumber: "",
     focusAreas: ["Emotional Regulation", "Relationships", "Career"],
     languages: ["English", "Mandarin"],
     location: "San Francisco, CA",
     rating: 4.8,
     sessions: 180,
     verified: true,
+    isInsured: true,
     availability: "Available tomorrow"
   },
   {
     id: 3,
     name: "Dr. Emily Rodriguez",
     photo: "/placeholder.svg",
-    bio: "Dual-certified in CBT & NLP, specializing in depression treatment and cognitive restructuring.",
-    licenseType: "Both CBT & NLP",
-    focusAreas: ["Depression", "Anxiety", "Limiting Beliefs"],
+    bio: "Dual-certified CBT & NLP practitioner, specializing in depression treatment and cognitive restructuring.",
+    certificationType: "Cognitive Behavioral Therapist",
+    licenseNumber: "CBT-67890",
+    focusAreas: ["Depression", "Anxiety", "Limiting Beliefs", "Trauma"],
     languages: ["English", "Spanish", "Portuguese"],
     location: "Miami, FL",
     rating: 4.9,
     sessions: 320,
     verified: true,
+    isInsured: true,
     availability: "Available this week"
   },
   {
     id: 4,
     name: "Dr. James Wilson",
     photo: "/placeholder.svg",
-    bio: "CBT specialist with expertise in career counseling and self-improvement strategies.",
-    licenseType: "CBT",
-    focusAreas: ["Career", "Self-Esteem", "Anxiety"],
+    bio: "NLP Master Practitioner with expertise in career counseling and self-improvement strategies.",
+    certificationType: "NLP Master Practitioner",
+    licenseNumber: "",
+    focusAreas: ["Career", "Self-Esteem", "Phobias"],
     languages: ["English", "French"],
     location: "Toronto, ON",
     rating: 4.7,
     sessions: 150,
     verified: true,
+    isInsured: false,
     availability: "Available next week"
   }
 ];
@@ -74,18 +82,20 @@ interface TherapistDirectoryProps {
 
 const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLicense, setSelectedLicense] = useState("");
+  const [selectedCertification, setSelectedCertification] = useState("");
   const [selectedFocus, setSelectedFocus] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [insuranceRequired, setInsuranceRequired] = useState("");
 
   const filteredTherapists = mockTherapists.filter((therapist) => {
     const matchesSearch = therapist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          therapist.bio.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLicense = !selectedLicense || therapist.licenseType.includes(selectedLicense);
+    const matchesCertification = !selectedCertification || therapist.certificationType.includes(selectedCertification);
     const matchesFocus = !selectedFocus || therapist.focusAreas.includes(selectedFocus);
     const matchesLanguage = !selectedLanguage || therapist.languages.includes(selectedLanguage);
+    const matchesInsurance = !insuranceRequired || (insuranceRequired === "yes" && therapist.isInsured) || (insuranceRequired === "no" && !therapist.isInsured);
 
-    return matchesSearch && matchesLicense && matchesFocus && matchesLanguage;
+    return matchesSearch && matchesCertification && matchesFocus && matchesLanguage && matchesInsurance;
   });
 
   return (
@@ -96,7 +106,7 @@ const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <div className="grid md:grid-cols-5 gap-4">
+          <div className="grid md:grid-cols-6 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -109,15 +119,14 @@ const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
               </div>
             </div>
 
-            <Select value={selectedLicense} onValueChange={setSelectedLicense}>
+            <Select value={selectedCertification} onValueChange={setSelectedCertification}>
               <SelectTrigger>
-                <SelectValue placeholder="License Type" />
+                <SelectValue placeholder="Certification" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
-                <SelectItem value="CBT">CBT</SelectItem>
-                <SelectItem value="NLP">NLP</SelectItem>
-                <SelectItem value="Both">Both CBT & NLP</SelectItem>
+                <SelectItem value="">All Certifications</SelectItem>
+                <SelectItem value="Cognitive Behavioral">CBT</SelectItem>
+                <SelectItem value="NLP Master">NLP</SelectItem>
               </SelectContent>
             </Select>
 
@@ -133,6 +142,8 @@ const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
                 <SelectItem value="Self-Esteem">Self-Esteem</SelectItem>
                 <SelectItem value="Relationships">Relationships</SelectItem>
                 <SelectItem value="Career">Career</SelectItem>
+                <SelectItem value="Trauma">Trauma</SelectItem>
+                <SelectItem value="Phobias">Phobias</SelectItem>
               </SelectContent>
             </Select>
 
@@ -147,6 +158,17 @@ const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
                 <SelectItem value="French">French</SelectItem>
                 <SelectItem value="Mandarin">Mandarin</SelectItem>
                 <SelectItem value="Portuguese">Portuguese</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={insuranceRequired} onValueChange={setInsuranceRequired}>
+              <SelectTrigger>
+                <SelectValue placeholder="Insurance" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All</SelectItem>
+                <SelectItem value="yes">Insured Only</SelectItem>
+                <SelectItem value="no">Not Required</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -198,8 +220,11 @@ const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
 
               <div className="space-y-3 mb-4">
                 <div>
-                  <span className="text-sm font-medium text-gray-700">License: </span>
-                  <Badge variant="secondary">{therapist.licenseType}</Badge>
+                  <span className="text-sm font-medium text-gray-700">Certification: </span>
+                  <Badge variant="secondary">{therapist.certificationType}</Badge>
+                  {therapist.licenseNumber && (
+                    <span className="text-xs text-gray-500 ml-2">#{therapist.licenseNumber}</span>
+                  )}
                 </div>
 
                 <div>
@@ -221,6 +246,16 @@ const TherapistDirectory = ({ onSelectTherapist }: TherapistDirectoryProps) => {
                         {lang}
                       </Badge>
                     ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    {therapist.isInsured && (
+                      <Badge variant="default" className="text-xs bg-green-600">
+                        Insured
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>

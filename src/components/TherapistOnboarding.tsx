@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle, Shield, Calendar, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,17 +23,18 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
 
   const [formData, setFormData] = useState({
     fullName: '',
-    licenseType: '',
+    certificationType: '',
     licenseNumber: '',
     issuingInstitution: '',
-    graduationDate: '',
+    certificationDate: '',
     documents: null as File | null,
     photo: null as File | null,
     bio: '',
     focusAreas: [] as string[],
     languages: [] as string[],
     location: '',
-    timezone: ''
+    timezone: '',
+    isInsured: false
   });
 
   const totalSteps = 3;
@@ -54,14 +56,14 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
     const file = e.target.files?.[0];
     if (file) {
       setFormData({ ...formData, documents: file });
-      // Simulate verification process
+      // Simulate Stripe Identity + AWS Textract + API verification process
       setTimeout(() => {
         setVerificationStatus('verified');
         toast({
           title: "Credentials Verified",
-          description: "Your credentials have been successfully verified.",
+          description: "Your credentials have been successfully verified via Stripe Identity and license validation APIs.",
         });
-      }, 2000);
+      }, 3000);
     }
   };
 
@@ -70,7 +72,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
       <div className="text-center mb-8">
         <Shield className="h-16 w-16 text-blue-600 mx-auto mb-4" />
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Identity & Credential Verification</h2>
-        <p className="text-gray-600">We need to verify your professional credentials and identity</p>
+        <p className="text-gray-600">We need to verify your professional credentials and identity using Stripe Identity and API validation</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -86,27 +88,36 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
           </div>
 
           <div>
-            <Label htmlFor="licenseType">License Type</Label>
-            <Select value={formData.licenseType} onValueChange={(value) => setFormData({ ...formData, licenseType: value })}>
+            <Label htmlFor="certificationType">License/Certification Type</Label>
+            <Select value={formData.certificationType} onValueChange={(value) => setFormData({ ...formData, certificationType: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select license type" />
+                <SelectValue placeholder="Select certification type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cbt">Cognitive Behavioral Therapy (CBT)</SelectItem>
-                <SelectItem value="nlp">Neuro-Linguistic Programming (NLP)</SelectItem>
-                <SelectItem value="both">Both CBT & NLP</SelectItem>
+                <SelectItem value="cbt">Cognitive Behavioral Therapist</SelectItem>
+                <SelectItem value="nlp">NLP Master Practitioner</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="licenseNumber">License Number</Label>
+            <Label htmlFor="licenseNumber">License Number {formData.certificationType === 'nlp' && <span className="text-gray-500">(Optional for NLP)</span>}</Label>
             <Input
               id="licenseNumber"
               value={formData.licenseNumber}
               onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
               placeholder="Enter your license number"
+              required={formData.certificationType === 'cbt'}
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="insured"
+              checked={formData.isInsured}
+              onCheckedChange={(checked) => setFormData({ ...formData, isInsured: checked as boolean })}
+            />
+            <Label htmlFor="insured">I am insured (Professional Liability Insurance)</Label>
           </div>
         </div>
 
@@ -117,17 +128,17 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
               id="institution"
               value={formData.issuingInstitution}
               onChange={(e) => setFormData({ ...formData, issuingInstitution: e.target.value })}
-              placeholder="Institution that issued your license"
+              placeholder="Institution that issued your certification"
             />
           </div>
 
           <div>
-            <Label htmlFor="graduationDate">Graduation Date</Label>
+            <Label htmlFor="certificationDate">Graduation/Certification Date</Label>
             <Input
-              id="graduationDate"
+              id="certificationDate"
               type="date"
-              value={formData.graduationDate}
-              onChange={(e) => setFormData({ ...formData, graduationDate: e.target.value })}
+              value={formData.certificationDate}
+              onChange={(e) => setFormData({ ...formData, certificationDate: e.target.value })}
             />
           </div>
 
@@ -147,6 +158,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
                 <span className="text-gray-500"> or drag and drop</span>
               </label>
               <p className="text-sm text-gray-500 mt-2">PDF, PNG, JPG up to 10MB</p>
+              <p className="text-xs text-gray-400 mt-2">Documents will be processed via AWS Textract for automatic verification</p>
             </div>
           </div>
         </div>
@@ -157,7 +169,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
           <CheckCircle className="h-6 w-6 text-green-600 mr-3" />
           <div>
             <p className="font-semibold text-green-900">Credentials Verified!</p>
-            <p className="text-green-700">Your credentials have been verified. You're now listed in the VirevaMind directory.</p>
+            <p className="text-green-700">Your credentials have been verified via Stripe Identity, AWS Textract OCR, and {formData.certificationType === 'cbt' ? 'Propelus PSV/NPI Registry' : 'NLP certification validation'}. You're now listed in the VirevaMind directory.</p>
           </div>
         </div>
       )}
@@ -222,7 +234,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
           <div>
             <Label>Focus Areas</Label>
             <div className="flex flex-wrap gap-2 mb-3">
-              {['Limiting Beliefs', 'Emotional Regulation', 'Anxiety', 'Depression', 'Self-Esteem', 'Relationships', 'Career'].map((area) => (
+              {['Limiting Beliefs', 'Emotional Regulation', 'Anxiety', 'Depression', 'Self-Esteem', 'Relationships', 'Career', 'Trauma', 'Phobias'].map((area) => (
                 <Badge
                   key={area}
                   variant={formData.focusAreas.includes(area) ? "default" : "outline"}
@@ -243,7 +255,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
           <div>
             <Label>Languages</Label>
             <div className="flex flex-wrap gap-2 mb-3">
-              {['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Mandarin'].map((lang) => (
+              {['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Mandarin', 'Arabic'].map((lang) => (
                 <Badge
                   key={lang}
                   variant={formData.languages.includes(lang) ? "default" : "outline"}
@@ -265,9 +277,12 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center mb-2">
                 <Shield className="h-5 w-5 text-blue-600 mr-2" />
-                <span className="font-semibold text-blue-900">Verified Therapist</span>
+                <span className="font-semibold text-blue-900">Verified {formData.certificationType === 'cbt' ? 'CBT' : 'NLP'} Therapist</span>
               </div>
               <p className="text-blue-700 text-sm">This badge will appear on your public profile</p>
+              {formData.isInsured && (
+                <p className="text-blue-700 text-sm mt-1">✓ Professional Liability Insurance Verified</p>
+              )}
             </div>
           )}
         </div>
@@ -280,7 +295,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
       <div className="text-center mb-8">
         <Calendar className="h-16 w-16 text-purple-600 mx-auto mb-4" />
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Calendar Integration</h2>
-        <p className="text-gray-600">Set up your availability and session preferences</p>
+        <p className="text-gray-600">Set up your availability and session preferences with Calendly API</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
@@ -306,7 +321,7 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
         <Card>
           <CardHeader>
             <CardTitle>Session Settings</CardTitle>
-            <CardDescription>Configure your session preferences</CardDescription>
+            <CardDescription>Configure your session preferences and Calendly integration</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -348,12 +363,20 @@ const TherapistOnboarding = ({ onBack }: TherapistOnboardingProps) => {
               </Select>
             </div>
 
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <div className="flex items-center mb-2">
+                <Calendar className="h-5 w-5 text-purple-600 mr-2" />
+                <span className="font-semibold text-purple-900">Calendly API Integration</span>
+              </div>
+              <p className="text-purple-700 text-sm">Auto-generated Zoom/Google Meet links will be created for each session booking</p>
+            </div>
+
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-6">
               <div className="flex items-center mb-2">
                 <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
                 <span className="font-semibold text-green-900">Calendar Integration Ready</span>
               </div>
-              <p className="text-green-700 text-sm">Your availability has been saved. Users can now book sessions with you.</p>
+              <p className="text-green-700 text-sm">Your availability has been saved. Users can now book sessions with you via Calendly.</p>
             </div>
           </CardContent>
         </Card>
